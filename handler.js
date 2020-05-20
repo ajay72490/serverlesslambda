@@ -10,6 +10,9 @@ AWS.config.update({
   region: process.env.region
 })
 const s3 = new AWS.S3
+const { v4: uuidv4 } = require('uuid')
+const bucketName = process.env.bucketName
+const s3Url = `https://${bucketName}.s3.ap-south-1.amazonaws.com/`
 app.use(express.json());
 
 
@@ -29,10 +32,13 @@ const upload = multer({
 
 
 app.post("/uploadtos3",upload.single('upload') ,async (req, res) => {
+  const filename = uuidv4()
+  const extension = req.file.mimetype.split('/').pop()
+  const Key = `${filename}/${extension}`
 
   const params = {
-    Bucket: process.env.bucketName,
-    Key: req.file.originalname,
+    Bucket: bucketName,
+    Key,
     Body: req.file.buffer,
     ContentType: req.file.mimetype,
     ACL: 'public-read'
@@ -41,7 +47,10 @@ app.post("/uploadtos3",upload.single('upload') ,async (req, res) => {
   s3.putObject(params).promise().then(s3Response => {
     res.json({
       statusCode: 200,
-      data: ({ body:  { s3Response }  })
+      data: ({ body:  { 
+        s3Response,
+        Location: `${s3Url}${Key}`
+      }})
     })
   }).catch(s3Error => {
     res.json({
