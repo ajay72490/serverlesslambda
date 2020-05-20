@@ -31,7 +31,7 @@ const upload = multer({
 app.post("/uploadtos3",upload.single('upload') ,async (req, res) => {
 
   const params = {
-    Bucket: 'alpha-aj2',
+    Bucket: process.env.bucketName,
     Key: req.file.originalname,
     Body: req.file.buffer,
     ContentType: req.file.mimetype,
