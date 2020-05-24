@@ -29,7 +29,7 @@ provider:
     secretAccessKey: '***'
     region: '***'
     bucketName: '***'
-  region: ap-south-1
+  region: ${self:provider.environment.bucketName}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
