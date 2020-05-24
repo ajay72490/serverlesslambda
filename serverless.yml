@@ -24,13 +24,17 @@ provider:
   name: aws
   runtime: nodejs12.x
   profile: serverless-admin
+  environment: 
+    accessKeyId: '***'
+    secretAccessKey: '***'
+    region: '***'
+    bucketName: '***'
   region: ap-south-1
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "s3:*"
-      Resource:
-      - "*"
+      Resource: "arn:aws:s3:::${self:provider.environment.bucketName}/*"
   apiGateway:
     binaryMediaTypes:
     - "*/*"     
@@ -55,11 +59,6 @@ functions:
           path: uploadtos3
           method: POST
           cors: true
-    environment: 
-      accessKeyId: '**********'
-      secretAccessKey: '*********'
-      region: '********'
-      bucketName: '*********'
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -111,3 +110,21 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+resources:
+  Resources:
+    UploadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.bucketName}
+        AccessControl: PublicRead
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - HEAD
+              AllowedOrigins:
+                - "*"
+              AllowedHeaders:
+                - "*"
